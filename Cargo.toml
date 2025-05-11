@@ -1,0 +1,15 @@
+[package]
+name = "bevy_link_window_to_monitor"
+version = "0.1.0"
+edition = "2024"
+categories = ["game-development"]
+keywords = ["bevy", "monitor", "window"]
+license = "MIT OR Apache-2.0"
+description = "A small micro-crate to associate Windows and Monitors"
+repository = "https://github.com/Sapein/bevy_link_window_to_monitor"
+readme = "README.md"
+
+[dependencies]
+bevy_window = { version = "0.16", default-features = false, features = ["libm", "bevy_reflect"]}
+bevy_ecs = { version = "0.16", default-features = false }
+bevy_app = { version = "0.16", default-features = false }
