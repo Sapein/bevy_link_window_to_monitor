@@ -1,10 +1,13 @@
+#![doc = include_str!("../README.md")]
 use bevy_app::{App, Plugin, PreUpdate};
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::query::{Changed, Or};
-use bevy_ecs::system::{Commands, Query};
+use bevy_ecs::query::{Changed, Or, With};
+use bevy_ecs::system::{Commands, NonSend, Query};
 use bevy_window::{Monitor, MonitorSelection, PrimaryMonitor, Window, WindowPosition};
+use bevy_winit::WinitWindows;
 
+/// The main plugin that, when added, will automagically update and manage Window positions.
 pub struct LinkWindowToMonitorPlugin;
 
 impl Plugin for LinkWindowToMonitorPlugin {
@@ -21,7 +24,8 @@ pub struct OnMonitor(pub Entity);
 #[relationship_target(relationship = OnMonitor, linked_spawn)]
 pub struct HasWindows(Vec<Entity>);
 
-/// determine_monitor
+/// Attempt to use heuristics to determine the which monitor the window is likely on. This may,
+/// however, fail under certain circumstances.
 ///
 /// # Arguments
 ///
@@ -48,12 +52,16 @@ pub struct HasWindows(Vec<Entity>);
 ///     }
 /// }
 /// ```
+#[deprecated(
+    since = "0.2.0",
+    note = "Use the System Parameter NonSend<WinitWindows> to use the winit window to get the current monitor instead."
+)]
 pub fn determine_monitor<'a>(
     window: &Window,
     monitors: Vec<(&'a Monitor, Option<&PrimaryMonitor>, Entity)>,
 ) -> Option<&'a Monitor> {
     match window.position {
-        WindowPosition::Automatic => None, // we can not determine the monitor it's on at all.
+        WindowPosition::Automatic => None,
         WindowPosition::At(window_pos) => {
             let mut zero_monitor = None;
             for (monitor, ..) in monitors {
@@ -97,36 +105,40 @@ pub fn determine_monitor<'a>(
 
 fn link_monitor_to_window(
     mut commands: Commands,
-    windows: Query<(&Window, Option<&OnMonitor>, Entity), Or<(Changed<Monitor>, Changed<Window>)>>,
-    monitors: Query<(&Monitor, Option<&PrimaryMonitor>, Entity)>,
+    windows: Query<
+        (Entity, Option<&OnMonitor>),
+        (With<Window>, Or<(Changed<Monitor>, Changed<Window>)>),
+    >,
+    monitors: Query<(&Monitor, Entity)>,
+    underlying: NonSend<WinitWindows>,
 ) {
-    for (window, on_monitor, window_entity) in windows {
-        let identified_monitor = match determine_monitor(window, monitors.iter().collect()) {
-            Some(monitor) => monitor,
-            None => {
-                if on_monitor.is_some() {
-                    commands.entity(window_entity).remove::<OnMonitor>();
-                }
-                continue;
-            }
-        };
-        let identified_monitor_entity = match monitors
-            .iter()
-            .find(|(m, ..)| m.name == identified_monitor.name)
-            .map(|(.., e)| e)
+    'window: for (entity, on_monitor) in windows {
+        let winit_monitor = match underlying
+            .entity_to_winit
+            .get(&entity)
+            .and_then(|i| underlying.windows.get(i))
+            .and_then(|w| w.current_monitor())
         {
-            Some(e) => e,
-            None => continue, // Maybe error here?
-        };
-
-        if let Some(attached_monitor) = on_monitor {
-            if identified_monitor_entity == attached_monitor.0 {
+            None => {
+                commands.entity(entity).remove::<OnMonitor>();
                 continue;
             }
-        }
+            Some(monitor) => monitor,
+        };
 
-        commands
-            .entity(window_entity)
-            .insert(OnMonitor(identified_monitor_entity));
+        for (monitor, monitor_entity) in monitors {
+            if monitor.name != winit_monitor.name()
+                || monitor.physical_position.x != winit_monitor.position().x
+                || monitor.physical_position.y != winit_monitor.position().y
+            {
+                continue;
+            }
+
+            if on_monitor.is_none_or(|m| m.0 != monitor_entity) {
+                commands.entity(entity).insert(OnMonitor(monitor_entity));
+            }
+            continue 'window;
+        }
+        commands.entity(entity).remove::<OnMonitor>();
     }
 }

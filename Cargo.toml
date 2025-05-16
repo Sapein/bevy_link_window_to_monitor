@@ -1,6 +1,6 @@
 [package]
 name = "bevy_link_window_to_monitor"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 categories = ["game-development"]
 keywords = ["bevy", "monitor", "window"]
@@ -11,5 +11,6 @@ readme = "README.md"
 
 [dependencies]
 bevy_window = { version = "0.16", default-features = false, features = ["libm", "bevy_reflect"]}
+bevy_winit = {version = "0.16" }
 bevy_ecs = { version = "0.16", default-features = false }
 bevy_app = { version = "0.16", default-features = false }
