@@ -46,7 +46,7 @@ pub struct HasWindows(Vec<Entity>);
 ///
 /// fn which_monitor(window: Single<&Window, With<PrimaryWindow>>, monitors: Query<(&Monitor, Option<&PrimaryMonitor>, Entity)>) {
 ///     if let Some(monitor) = determine_monitor(*window, monitors.iter().collect()) {
-///         println!("On Monitor: {}", monitor.name);
+///         println!("On Monitor: {}", monitor.name.clone().unwrap());
 ///     } else {
 ///         println!("No monitor found!");
 ///     }

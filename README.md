@@ -15,11 +15,12 @@ if you wish to handle the linking yourself.
 |          0.1           |     0.16     |
 |          0.2           |     0.16     |
 |        0.3-rc.1        |  0.17-rc.1   |
+|          0.3           |     0.17     |
 
 ## Example
 Here's a brief example of a very basic Bevy App that, alongside this crate, will create a window and print out the monitor
 it is on.
-```rust
+```rust,ignore
 use bevy::prelude::*;
 use bevy::window::{Monitor, PrimaryWindow};
 use bevy_link_window_to_monitor::LinkWindowToMonitorPlugin;
