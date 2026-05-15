@@ -1,4 +1,15 @@
 # bevy_link_window_to_monitor  
+
+> [!Important]
+> As of Bevy 0.19, the functionality of this crate has been upstreamed! You can switch to using the Bevy-native version
+> by simply removing this crate, and importing the Relationships from Bevy -- which are named the same.
+
+> [!WARNING]
+> This crate is *DEPRECATED* and will not be receiving any updates beyond version 0.5, as this crate has functionally
+> been upstreamed into Bevy! As such it is highly recommended that you migrate to the Bevy native version.
+> 
+> 0.5 does *NOT* have any additional functionality, and exists solely to make it easier to upgrade directly to 0.19.
+ 
  `bevy_link_window_to_monitor` is a bevy micro-crate designed to provide a small API around linking windows with monitors,
 since that API is currently missing within Bevy itself.
 
@@ -15,6 +26,7 @@ and `HasWindows` Relationship Components to determine which window it's on.
 |        0.3-rc.1        |  0.17-rc.1   |
 |          0.3           |     0.17     |
 |          0.4           |     0.18     |
+|        0.5-rc.1        |  0.19-rc.1   |
 
 ## Example
 Here's a brief example of a very basic Bevy App that, alongside this crate, will create a window and print out the monitor
