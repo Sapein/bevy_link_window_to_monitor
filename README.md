@@ -27,6 +27,7 @@ and `HasWindows` Relationship Components to determine which window it's on.
 |          0.3           |     0.17     |
 |          0.4           |     0.18     |
 |        0.5-rc.1        |  0.19-rc.1   |
+|          0.5           |     0.19     |
 
 ## Example
 Here's a brief example of a very basic Bevy App that, alongside this crate, will create a window and print out the monitor
